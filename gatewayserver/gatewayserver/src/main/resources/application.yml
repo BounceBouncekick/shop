@@ -1,0 +1,47 @@
+server:
+  port: 8000
+
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+
+spring:
+  application:
+    name: gateway-service
+
+  cloud:
+    gateway:
+      routes:
+        - id: first-service
+          uri: http://localhost:8001/
+          predicates:
+            - Path=/first-service/**
+
+        - id: jwt-service
+          uri: http://localhost:8082/
+          predicates:
+            - Path=/jwt-service/**
+            - Method=GET
+          filters:
+            - RemoveRequestHeader=Cookie
+            - AuthorizationHeaderFilter
+
+        - id: jwt-service
+          uri: http://localhost:8082/
+          predicates:
+            - Path=/jwt-service/**
+            - Method=POST
+          filters:
+            - RemoveRequestHeader=Cookie
+
+token:
+  secret: user_token
+  expiration-time: 360000 # 만료 시간을 초 단위로 설정 (예: 1시간)
+
+
+
+
+
