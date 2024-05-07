@@ -1,10 +1,12 @@
 package com.example.jwtjwt.config;
 
 import com.example.jwtjwt.filter.LoginFilter;
+import com.example.jwtjwt.jwt.JWTFilter;
 import com.example.jwtjwt.jwt.JWTUtil;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -56,14 +58,19 @@ public class SecurityConfig {
         http
 
                 .authorizeHttpRequests((auth) -> auth
-         //                   .anyRequest().permitAll());
                         .requestMatchers(new AntPathRequestMatcher("/jwt-service/join")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/jwt-service/login")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/jwt-service/health-check")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/jwt-service/admin")).hasRole("ADMIN")
                       .anyRequest().authenticated());
 
         //필터 추가 LoginFilter()는 인자를 받음 (AuthenticationManager() 메소드에 authenticationConfiguration 객체를 넣어야 함) 따라서 등록 필요
         http
                 .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration),jwtUtil), UsernamePasswordAuthenticationFilter.class);
+
+        //JWTFilter 등록
+        http
+                .addFilterBefore(new JWTFilter(jwtUtil), LoginFilter.class);
 
         http
                 .sessionManagement((session) -> session

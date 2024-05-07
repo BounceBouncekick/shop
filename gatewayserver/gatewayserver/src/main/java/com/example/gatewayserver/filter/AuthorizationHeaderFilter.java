@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
+import java.util.Date;
 
 
 @Component
@@ -37,17 +38,24 @@ public class AuthorizationHeaderFilter extends AbstractGatewayFilterFactory<Auth
         GatewayFilter filter = (exchange, chain) -> {
             ServerHttpRequest request = exchange.getRequest();
 
+            // 클라이언트 요청의 HTTP 메소드 및 경로 로깅
+            log.info("Received request: {} {}", request.getMethod(), request.getPath());
+
             if (!request.getHeaders().containsKey(HttpHeaders.AUTHORIZATION)) {
+                // 요청 헤더에 포함된 Authorization 헤더 및 JWT 값 로깅
+                log.error("No Authorization header");
                 return onError(exchange, "No Authorization header", HttpStatus.UNAUTHORIZED);
             }
 
             String authorizationHeader = request.getHeaders().get(HttpHeaders.AUTHORIZATION).get(0);
             String jwt = authorizationHeader.replace("Bearer ", "");
 
+            // 요청 헤더에 포함된 Authorization 헤더 및 JWT 값 로깅
             log.info("authorizationHeader : " + authorizationHeader);
             log.info("jwt : " + jwt );
 
             if (!isJwtValid(jwt)) {
+                log.error("JWT Token is not valid");
                 return onError(exchange, "JWT Token is not valid", HttpStatus.UNAUTHORIZED);
             }
 
@@ -68,6 +76,12 @@ public class AuthorizationHeaderFilter extends AbstractGatewayFilterFactory<Auth
             // JWT 토큰에서 Subject 가져오기
             String subject = jwtParser.parseClaimsJws(jwt).getBody().getSubject();
             log.info("Subject: " + subject);
+
+            // 발급 시간(iat) 및 만료 시간(exp) 가져오기
+            Date issuedAt = claims.getIssuedAt();
+            Date expiration = claims.getExpiration();
+            log.info("Issued At: " + issuedAt);
+            log.info("Expiration: " + expiration);
 
             if (subject != null) {
                 returnValue = true;

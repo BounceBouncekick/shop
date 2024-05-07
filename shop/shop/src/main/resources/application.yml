@@ -1,5 +1,5 @@
 server:
-  port: 8082
+  port: 8083
 
 eureka:
   client:
@@ -8,9 +8,10 @@ eureka:
     service-url:
       defaultZone: http://localhost:8761/eureka
 
+
 spring:
   application:
-    name: jwt-service
+    name: shop-service
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: ${MySQL_URL}
@@ -25,15 +26,8 @@ spring:
     open-in-view: false
     show-sql: true
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
 
   jwt:
     secret: ${JWT_SECRET}
     expiration-time: 3600000000000 # 만료 시간을 초 단위로 설정 (예: 1시간)
-
-logging:
-  level:
-    root: INFO
-    com:
-      example:
-        jwtjwt: TRACE

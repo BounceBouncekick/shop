@@ -9,6 +9,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import org.springframework.security.core.GrantedAuthority;
 
 @Service
 @Slf4j
@@ -27,12 +28,19 @@ public class AuthenticationService {
     public String authenticateUser(String username, String password) {
         try {
             Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
-            log.info("authentication"+ authentication);
-            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-            log.info("userDetails" + userDetails);
+            log.info("Authentication: " + authentication);
 
-            return jwtUtil.createJwt(username, userDetails.getAuthorities().toString(), 60*60*10L);
+            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+            log.info("UserDetails: " + userDetails);
+
+            String role = userDetails.getAuthorities().stream()
+                    .findFirst()
+                    .map(GrantedAuthority::getAuthority)
+                    .orElse(""); // 권한이 없을 경우 빈 문자열 반환
+
+            return jwtUtil.createJwt(username, role, 60 * 60 * 10L); // 권한만 전달
         } catch (AuthenticationException e) {
+            log.error("Authentication failed: " + e.getMessage());
             return null; // 인증 실패 시 null 반환
         }
     }

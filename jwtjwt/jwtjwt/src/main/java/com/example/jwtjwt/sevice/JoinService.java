@@ -55,9 +55,13 @@ public class JoinService {
         data.setUsername(username);
         data.setPassword(bCryptPasswordEncoder.encode(password));
         data.setUserEmail(userEmail);
-        data.setRole("ADMIN");
+        data.setRole("ROLE_ADMIN");
 
         userRepository.save(data);
+    }
+
+    public boolean checkNameDuplicate(String name){
+        return userRepository.existsByUsername(name);
     }
 
 }

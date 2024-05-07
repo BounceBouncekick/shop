@@ -4,23 +4,15 @@ import com.example.jwtjwt.dto.JoinDTO;
 import com.example.jwtjwt.jwt.JWTUtil;
 import com.example.jwtjwt.sevice.JoinService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 @Controller
 @ResponseBody
 public class JoinController {
 
-
-    @Autowired
-    private AuthenticationManager authenticationManager;
-
-    @Autowired
-    private JWTUtil jwtUtil;
     private final JoinService joinService;
 
     public JoinController(JoinService joinService) {
@@ -38,4 +30,8 @@ public class JoinController {
     }
 
 
+    @GetMapping("/jwt-service/{name}/exists")
+    public ResponseEntity<Boolean> checkNameDuplicate(@PathVariable String name){
+        return ResponseEntity.ok(joinService.checkNameDuplicate(name));
+    }
 }
